@@ -1,34 +1,45 @@
-package main;
+package main.TriviaGamePart;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
+
 
 public class TriviaGame {
     ArrayList players = new ArrayList();
     int[] places = new int[6];
     int[] purses = new int[6];
     boolean[] inPenaltyBox = new boolean[6];
+    List<QuestionPatternMatcher> questionPatternMatcherList;
+    Question currentQuestion;
+    Player currentPlayerObj;
+    int currentPlayer = 0;
 
     LinkedList popQuestions = new LinkedList();
     LinkedList scienceQuestions = new LinkedList();
     LinkedList sportsQuestions = new LinkedList();
     LinkedList rockQuestions = new LinkedList();
 
-    ArrayList<LinkedList> questionList ;
+    ArrayList<Question> questionList ;
     MergedQuestionList mergedQuestionList;
-    int currentPlayer = 0;
     boolean isGettingOutOfPenaltyBox;
     AskingQuestion askingQuestion = new AskingQuestion(questionList,currentCategory());
 
     public TriviaGame() {
-        for (int i = 0; i < 50; i++) {
-            popQuestions.addLast("Pop Question " + i);
-            scienceQuestions.addLast(("Science Question " + i));
-            sportsQuestions.addLast(("Sports Question " + i));
-            rockQuestions.addLast(createRockQuestion(i));
-        }
-        mergedQuestionList = new MergedQuestionList(popQuestions,scienceQuestions,sportsQuestions,rockQuestions);
-        questionList = mergedQuestionList.mergeQuestions();
+        addQuestionType("Rock");
+        addQuestionType("Sports");
+        addQuestionType("Science");
+        addQuestionType("Pop");
+        questionPatternMatcherList = Arrays.asList(
+                new PopQuestionPatternMatcher(),
+                new ScienceQuestionPatternMatcher(),
+                new SportsQuestionPatternMatcher(),
+                new RockQuestionPatternMatcher()
+        );
+    }
+    public void addQuestionType(String questionType) {
+        questionList.add(new Question(questionType));
     }
 
     public String createRockQuestion(int index) {
@@ -72,7 +83,7 @@ public class TriviaGame {
                         + "'s new location is "
                         + places[currentPlayer]);
                 announce("The category is " + currentCategory());
-                askingQuestion.askQuestion();
+                //askingQuestion.askQuestion();
             } else {
                 announce(players.get(currentPlayer) + " is not getting out of the penalty box");
                 isGettingOutOfPenaltyBox = false;
@@ -87,9 +98,22 @@ public class TriviaGame {
                     + "'s new location is "
                     + places[currentPlayer]);
             announce("The category is " + currentCategory());
-            askingQuestion.askQuestion();
+           // askingQuestion.askQuestion();
         }
 
+    }
+
+    private void getCurrentQuestion() {
+        for (Question question : questionList) {
+            for (QuestionPatternMatcher questionPatternMatcher : questionPatternMatcherList) {
+                if (questionPatternMatcher.match(currentPlayerObj.getPlace())) {
+                    if (questionPatternMatcher.generateResponse().equals(question.getQuestion_type())) {
+                        currentQuestion = question;
+                        break;
+                    }
+                }
+            }
+        }
     }
 
 

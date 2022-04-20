@@ -1,4 +1,4 @@
-package main;
+package main.TriviaGamePart;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
